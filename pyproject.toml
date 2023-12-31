@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "mmw-custodian"
+version = "0.1.0"
+description = " A bot to do several custodial tasks for a particular Mage the Awakening Discord server."
+authors = ["Brian-Bowyer <bobsnake64@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+py-cord = "^2.4.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[tool.poetry.group.dev.dependencies]
+testcord = "^0.0.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 90
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+addopts = "-x --cov=app --cov-report html --ff"
