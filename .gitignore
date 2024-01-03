@@ -160,4 +160,4 @@ cython_debug/
 #.idea/
 
 # Added manually
-constants.py
+environment.env

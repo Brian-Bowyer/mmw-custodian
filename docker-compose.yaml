@@ -1,0 +1,25 @@
+version: "3.7"
+
+services:
+  postgres:
+    container_name: custodian_postgres
+    restart: always
+    image: postgres:12.1
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: custodian
+      POSTGRES_PASSWORD: custodian
+      POSTGRES_DB: custodian
+
+  custodian:
+    container_name: custodian
+    restart: always
+    build:
+      context: ./
+    ports:
+      - 80:80
+    depends_on:
+      - postgres
