@@ -1,6 +1,7 @@
 import discord
-from constants import SECRET_TOKEN, TESTING_SERVERS
-from initiative import setup as setup_init
+
+from bot.constants import SECRET_TOKEN, TESTING_SERVERS
+from bot.initiative import setup as setup_init
 
 bot = discord.Bot()
 
