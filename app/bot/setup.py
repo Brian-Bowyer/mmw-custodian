@@ -1,8 +1,11 @@
+import logging
+
 import discord
 
-from bot.constants import SECRET_TOKEN, TESTING_SERVERS
-from bot.initiative import setup as setup_init
+from app.bot.initiative import setup as setup_init
+from app.constants import TESTING_SERVERS
 
+log = logging.getLogger(__name__)
 bot = discord.Bot()
 
 
@@ -14,8 +17,4 @@ async def ping(ctx) -> None:
 @bot.event
 async def on_ready():
     setup_init(bot)
-    print("MMW custodian running!")
-
-
-if __name__ == "__main__":
-    bot.run(SECRET_TOKEN)
+    log.info("MMW custodian running!")
