@@ -1,6 +1,5 @@
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy.types import DateTime, Integer, String
-
 from tables.base import Base
 
 
@@ -10,7 +9,7 @@ class Initiative(Base):
     id = Column(Integer, primary_key=True)
     channel_id = Column(String, nullable=False)
     current_round = Column(Integer, nullable=False, default=1)
-    current_init = Column(Integer, nullable=False)
+    current_init = Column(Integer, nullable=True)
 
 
 class InitiativeMember(Base):

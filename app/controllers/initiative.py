@@ -1,9 +1,13 @@
 from app.tables.base import database
 
 
-async def create_initiative(channel_id: str | int):
+@database.transaction()
+async def create_initiative(channel_id: str | int, current_round: int = 1):
     """Creates an initiative tracker."""
-    pass
+    return await database.execute(
+        "INSERT INTO initiative_trackers (channel_id, current_round) VALUES (:channel_id, :current_round)",
+        {"channel_id": channel_id, "current_round": current_round},
+    )
 
 
 async def delete_initiative(tracker_id: str | int):
