@@ -5,6 +5,6 @@ from app.constants import DATABASE_URL
 
 
 @pytest.fixture
-async def db() -> Database:
+def db() -> Database:
     """Returns a database object."""
     return Database(DATABASE_URL)
