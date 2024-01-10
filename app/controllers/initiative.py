@@ -1,7 +1,7 @@
 from app.tables.base import database
 
 
-async def create_initiative():
+async def create_initiative(channel_id: str | int):
     """Creates an initiative tracker."""
     pass
 
