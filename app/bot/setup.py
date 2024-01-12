@@ -4,6 +4,7 @@ import discord
 
 from app.bot.initiative import setup as setup_init
 from app.constants import TESTING_SERVERS
+from app.tables.base import database
 
 log = logging.getLogger(__name__)
 bot = discord.Bot()
@@ -18,3 +19,16 @@ async def ping(ctx) -> None:
 async def on_ready():
     setup_init(bot)
     log.info("MMW custodian running!")
+
+
+@bot.event
+async def on_connect():
+    await database.connect()
+    log.info("Connected to database!")
+
+
+@bot.event
+async def on_disconnect():
+    await database.disconnect()
+    log.info("Disconnected from database!")
+    log.info("MMW custodian shutting down!")
