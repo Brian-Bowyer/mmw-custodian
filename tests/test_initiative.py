@@ -2,9 +2,12 @@ import pytest
 
 from app.controllers import initiative
 
+# from app.tables.base import database
+
 
 @pytest.mark.asyncio
 async def test_it_creates_an_initiative(db):
+    # assert db.url == database.url
     result = await initiative.create_initiative("123456")
     assert result
 
