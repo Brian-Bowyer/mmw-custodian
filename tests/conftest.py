@@ -4,7 +4,7 @@ from databases import Database
 from sqlalchemy_utils import create_database, drop_database
 
 from app.constants import DATABASE_URL
-from app.tables.base import Base, database, engine
+from app.models import Base, database, engine
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)

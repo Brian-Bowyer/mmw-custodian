@@ -4,7 +4,7 @@ import discord
 
 from app.bot.initiative import setup as setup_init
 from app.constants import TESTING_SERVERS
-from app.tables.base import database
+from app.models import database
 
 log = logging.getLogger(__name__)
 bot = discord.Bot()
