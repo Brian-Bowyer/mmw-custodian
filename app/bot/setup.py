@@ -2,7 +2,7 @@ import logging
 
 import discord
 
-from app.bot.initiative import setup as setup_init
+from app.bot.initiative import add_init_commands
 from app.constants import TESTING_SERVERS
 from app.models import database
 
@@ -17,7 +17,7 @@ async def ping(ctx) -> None:
 
 @bot.event
 async def on_ready():
-    setup_init(bot)
+    add_init_commands(bot)
     log.info("MMW custodian running!")
 
 

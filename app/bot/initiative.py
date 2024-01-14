@@ -1,49 +1,49 @@
-from discord import SlashCommandGroup
+import logging
+
+import discord
 from discord.ext.commands import Context
 
-init_commands = SlashCommandGroup("init", "commands relating to initiative")
+from app.controllers import initiative
+
+log = logging.getLogger(__name__)
 
 
-@init_commands.command()
-async def start(ctx: Context):
-    pass
+def add_init_commands(bot: discord.Bot):
+    log.info("Adding initiative commands")
+    init_commands = bot.create_group("init", "commands relating to initiative")
 
+    @init_commands.command()
+    async def start(ctx: Context):
+        await initiative.create_initiative(ctx.channel)
+        print("Initiative created!")
 
-@init_commands.command()
-async def end(ctx: Context):
-    pass
+    @init_commands.command()
+    async def end(ctx: Context):
+        pass
 
+    @init_commands.command()
+    async def add(ctx: Context, player: str, init_value: int):
+        pass
 
-@init_commands.command()
-async def add(ctx: Context, player: str, init_value: int):
-    pass
+    @init_commands.command()
+    async def remove(ctx: Context, player: str):
+        pass
 
+    @init_commands.command()
+    async def update(ctx: Context, player: str, init_value: int):
+        pass
 
-@init_commands.command()
-async def remove(ctx: Context, player: str):
-    pass
+    @init_commands.command()
+    async def next(ctx: Context):
+        pass
 
+    @init_commands.command()
+    async def back(ctx: Context):
+        pass
 
-@init_commands.command()
-async def update(ctx: Context, player: str, init_value: int):
-    pass
+    @init_commands.command()
+    async def goto(ctx: Context, current_init: int):
+        # TODO support setting by init or player?
+        pass
 
-
-@init_commands.command()
-async def next(ctx: Context):
-    pass
-
-
-@init_commands.command()
-async def back(ctx: Context):
-    pass
-
-
-@init_commands.command()
-async def goto(ctx: Context, current_init: int):
-    # TODO support setting by init or player?
-    pass
-
-
-def setup(bot):
-    bot.add_application_command(init_commands)
+    log.info("Initiative commands added!")
