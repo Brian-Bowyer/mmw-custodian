@@ -10,8 +10,8 @@ py-cord = "^2.4.1"
 psycopg2 = "^2.9.9"
 pytest-asyncio = "^0.23.3"
 alembic = "^1.13.1"
-sqlalchemy = "^1.4"
-databases = {extras = ["aiopg"], version = "^0.8.0"}
+sqlalchemy = "1.4.51"
+databases = {extras = ["asyncpg"], version = "^0.8.0"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^7"
