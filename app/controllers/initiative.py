@@ -8,7 +8,7 @@ async def create_initiative(channel_id: str | int, current_round: int = 1):
     async with database:
         await database.execute(
             "INSERT INTO initiative_trackers (channel_id, current_round) VALUES (:channel_id, :current_round)",
-            {"channel_id": channel_id, "current_round": current_round},
+            {"channel_id": str(channel_id), "current_round": current_round},
         )
 
 

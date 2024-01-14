@@ -14,7 +14,7 @@ def add_init_commands(bot: discord.Bot):
 
     @init_commands.command()
     async def start(ctx: Context):
-        await initiative.create_initiative(ctx.channel)
+        await initiative.create_initiative(ctx.channel.id)
         print("Initiative created!")
 
     @init_commands.command()
