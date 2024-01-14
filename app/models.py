@@ -1,6 +1,6 @@
 from databases import Database
 from sqlalchemy import Column, ForeignKey, create_engine
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.types import DateTime, Integer, String
 
 from app.constants import DATABASE_URL

@@ -1,18 +1,15 @@
-from databases import Database
-
-from app.constants import DATABASE_URL
+from app.models import database
 
 # TODO transactions
 
 
 async def create_initiative(channel_id: str | int, current_round: int = 1):
     """Creates an initiative tracker."""
-    async with Database(DATABASE_URL) as database:
-        result = await database.execute(
+    async with database:
+        await database.execute(
             "INSERT INTO initiative_trackers (channel_id, current_round) VALUES (:channel_id, :current_round)",
             {"channel_id": channel_id, "current_round": current_round},
         )
-        return result
 
 
 async def delete_initiative(tracker_id: str | int):
