@@ -1,15 +1,19 @@
+import logging
+
 from app.models import database
 
 # TODO transactions
+log = logging.getLogger(__name__)
 
 
 async def create_initiative(channel_id: str | int, current_round: int = 1):
     """Creates an initiative tracker."""
-    async with database:
-        await database.execute(
-            "INSERT INTO initiative_trackers (channel_id, current_round) VALUES (:channel_id, :current_round)",
-            {"channel_id": str(channel_id), "current_round": current_round},
-        )
+    log.info("Creating initiative tracker...")
+    await database.execute(
+        "INSERT INTO initiative_trackers (channel_id, current_round) VALUES (:channel_id, :current_round)",
+        {"channel_id": str(channel_id), "current_round": current_round},
+    )
+    log.info("Initiative tracker created!")
 
 
 async def delete_initiative(tracker_id: str | int):

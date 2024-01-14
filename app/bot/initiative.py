@@ -1,7 +1,6 @@
 import logging
 
 import discord
-from discord.ext.commands import Context
 
 from app.controllers import initiative
 
@@ -13,36 +12,38 @@ def add_init_commands(bot: discord.Bot):
     init_commands = bot.create_group("init", "commands relating to initiative")
 
     @init_commands.command()
-    async def start(ctx: Context):
+    async def start(ctx):
+        log.info("Starting initiative tracker...")
         await initiative.create_initiative(ctx.channel.id)
-        print("Initiative created!")
+        log.info("Initiative tracker started!")
+        await ctx.respond("Initiative tracker started!")
 
     @init_commands.command()
-    async def end(ctx: Context):
+    async def end(ctx):
         pass
 
     @init_commands.command()
-    async def add(ctx: Context, player: str, init_value: int):
+    async def add(ctx, player: str, init_value: int):
         pass
 
     @init_commands.command()
-    async def remove(ctx: Context, player: str):
+    async def remove(ctx, player: str):
         pass
 
     @init_commands.command()
-    async def update(ctx: Context, player: str, init_value: int):
+    async def update(ctx, player: str, init_value: int):
         pass
 
     @init_commands.command()
-    async def next(ctx: Context):
+    async def next(ctx):
         pass
 
     @init_commands.command()
-    async def back(ctx: Context):
+    async def back(ctx):
         pass
 
     @init_commands.command()
-    async def goto(ctx: Context, current_init: int):
+    async def goto(ctx, current_init: int):
         # TODO support setting by init or player?
         pass
 
