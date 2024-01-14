@@ -7,11 +7,11 @@ authors = ["Brian-Bowyer <bobsnake64@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.11"
 py-cord = "^2.4.1"
-databases = {extras = ["asyncpg"], version = "^0.8.0"}
 psycopg2 = "^2.9.9"
 pytest-asyncio = "^0.23.3"
 alembic = "^1.13.1"
 sqlalchemy = "^1.4"
+databases = {extras = ["aiopg"], version = "^0.8.0"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^7"
