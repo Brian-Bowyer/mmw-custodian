@@ -1,12 +1,18 @@
 import logging
 
+from databases import Database
+
 from app.models import database
 
 # TODO transactions
 log = logging.getLogger(__name__)
 
 
-async def create_initiative(channel_id: str | int, current_round: int = 1):
+async def create_initiative(
+    channel_id: str | int,
+    current_round: int = 1,
+    database: Database = database,
+):
     """Creates an initiative tracker."""
     log.info("Creating initiative tracker...")
     await database.execute(
