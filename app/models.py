@@ -10,7 +10,7 @@ engine = create_engine(DATABASE_URL)
 database = Database(DATABASE_URL)
 
 
-class Initiative(Base):
+class InitiativeTracker(Base):
     __tablename__ = "initiative_trackers"
 
     id = Column(Integer, primary_key=True)
@@ -25,7 +25,7 @@ class InitiativeMember(Base):
     id = Column(Integer, primary_key=True)
     initiative_id = Column(
         Integer,
-        ForeignKey(Initiative.id, ondelete="CASCADE"),
+        ForeignKey(InitiativeTracker.id, ondelete="CASCADE"),
         nullable=False,
     )
     player_name = Column(String, nullable=False)
