@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 
 from databases import Database
 
+from app.errors import NotFoundError
 from app.models import database
 
 # TODO transactions
@@ -28,6 +29,7 @@ class Participant:
 
 @dataclass(frozen=True)
 class InitiativeTracker:
+    id: int
     channel_id: str | int
     current_round: int
     participants: tuple[Participant] = field(default_factory=tuple)  # type: ignore
@@ -61,11 +63,25 @@ async def create_initiative(
     log.info("Initiative tracker created!")
 
 
-async def get_initiative(channel_id: str | int, database: Database = database):
+async def get_initiative(
+    channel_id: str | int, database: Database = database
+) -> InitiativeTracker:
     """Gets an initiative tracker."""
     query = "SELECT * FROM initiative_trackers WHERE channel_id = :channel_id"
-    # TODO this returns a db object, convert it to something nicer
-    return await database.fetch_one(query, {"channel_id": str(channel_id)})
+    db_init = await database.fetch_one(query, {"channel_id": str(channel_id)})
+    if db_init is None:
+        raise NotFoundError(f"Initiative tracker for channel {channel_id} not found!")
+
+    db_participants = await database.fetch_all(
+        "SELECT * FROM initiative_members WHERE initiative_id = :initiative_id",
+        {"initiative_id": db_init["id"]},
+    )
+    final_participants = [Participant(**(p._mapping)) for p in db_participants]
+    return InitiativeTracker(
+        channel_id=db_init["channel_id"],
+        current_round=db_init["current_round"],
+        participants=tuple(final_participants),  # type: ignore
+    )
 
 
 async def add_participant(
@@ -73,14 +89,34 @@ async def add_participant(
     player_name: str,
     initiative: int,
     database: Database = database,
-):
+) -> InitiativeTracker:
     """Adds a character to an initiative tracker."""
-    pass
+    log.info("Adding participant...")
+    tracker = await get_initiative(channel_id, database=database)
+
+    await database.execute(
+        "INSERT INTO initiative_members (initiative_id, player_name, init_value) VALUES (:initiative_id, :player_name, :init_value)",
+        {
+            "initiative_id": tracker.id,
+            "player_name": player_name,
+            "init_value": initiative,
+        },
+    )
+    log.info("Participant added!")
+
+    new_participant = Participant(name=player_name, initiative=initiative)
+    new_participants = tracker.participants + (new_participant,)
+    new_tracker = InitiativeTracker(
+        channel_id=tracker.channel_id,
+        current_round=tracker.current_round,
+        participants=new_participants,
+    )
+    return new_tracker
 
 
 async def remove_participant(
     channel_id: str | int, player_name: str, database: Database = database
-):
+) -> InitiativeTracker:
     """Removes a character from an initiative tracker."""
     pass
 
@@ -90,7 +126,7 @@ async def update_participant(
     player_name: str,
     initiative: int,
     database: Database = database,
-):
+) -> InitiativeTracker:
     """Updates a participant in an initiative tracker."""
     pass
 

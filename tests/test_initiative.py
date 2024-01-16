@@ -3,6 +3,7 @@ from databases import Database
 
 from app.constants import DATABASE_URL
 from app.controllers import initiative
+from app.errors import NotFoundError
 
 
 # NOTE: doing the inefficient thing and creating a new Database object for each test
@@ -25,16 +26,16 @@ async def test_create_initiative_creates_an_initiative():
 async def test_get_initiative_gets_an_initiative():
     async with Database(DATABASE_URL, force_rollback=True) as db:
         await initiative.create_initiative("123456", database=db)
-        db_entry = await initiative.get_initiative("123456", database=db)
-        assert db_entry is not None
-        assert db_entry["channel_id"] == "123456"
+        tracker = await initiative.get_initiative("123456", database=db)
+        assert tracker is not None
+        assert tracker.channel_id == "123456"
 
 
 @pytest.mark.asyncio
-async def test_get_initiative_returns_none_if_no_initiative():
+async def test_get_initiative_errors_if_no_initiative():
     async with Database(DATABASE_URL, force_rollback=True) as db:
-        db_entry = await initiative.get_initiative("123456", database=db)
-        assert db_entry is None
+        with pytest.raises(NotFoundError):
+            _ = await initiative.get_initiative("123456", database=db)
 
 
 @pytest.mark.asyncio
@@ -62,7 +63,7 @@ async def test_add_participant_adds_a_participant():
 async def test_remove_participant_removes_a_participant():
     async with Database(DATABASE_URL, force_rollback=True) as db:
         await initiative.create_initiative("123456", database=db)
-        await initiative.add_to_initiative("123456", "Bob", 10, database=db)
+        await initiative.add_participant("123456", "Bob", 10, database=db)
         db_entry = await db.fetch_one(
             "SELECT * FROM initiative_trackers WHERE channel_id = '123456'"
         )
@@ -81,7 +82,7 @@ async def test_remove_participant_removes_a_participant():
 async def test_update_participant_updates_an_initiative():
     async with Database(DATABASE_URL, force_rollback=True) as db:
         await initiative.create_initiative("123456", database=db)
-        await initiative.add_to_initiative("123456", "Bob", 10, database=db)
+        await initiative.add_participant("123456", "Bob", 10, database=db)
         db_entry = await db.fetch_one(
             "SELECT * FROM initiative_trackers WHERE channel_id = '123456'"
         )
