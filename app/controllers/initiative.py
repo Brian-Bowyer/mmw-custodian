@@ -50,9 +50,7 @@ class InitiativeTracker:
 
 
 async def create_initiative(
-    channel_id: str | int,
-    current_round: int = 1,
-    database: Database = database,
+    channel_id: str | int, current_round: int = 1, database: Database = database
 ):
     """Creates an initiative tracker."""
     log.info("Creating initiative tracker...")
@@ -63,28 +61,40 @@ async def create_initiative(
     log.info("Initiative tracker created!")
 
 
-async def get_initiative(channel_id: str | int):
+async def get_initiative(channel_id: str | int, database: Database = database):
     """Gets an initiative tracker."""
     query = "SELECT * FROM initiative_trackers WHERE channel_id = :channel_id"
     # TODO this returns a db object, convert it to something nicer
     return await database.fetch_one(query, {"channel_id": str(channel_id)})
 
 
-async def add_participant(channel_id: str | int, player_name: str, initiative: int):
+async def add_participant(
+    channel_id: str | int,
+    player_name: str,
+    initiative: int,
+    database: Database = database,
+):
     """Adds a character to an initiative tracker."""
     pass
 
 
-async def remove_participant(channel_id: str | int, player_name: str):
+async def remove_participant(
+    channel_id: str | int, player_name: str, database: Database = database
+):
     """Removes a character from an initiative tracker."""
     pass
 
 
-async def update_participant(channel_id: str | int, player_name: str, initiative: int):
+async def update_participant(
+    channel_id: str | int,
+    player_name: str,
+    initiative: int,
+    database: Database = database,
+):
     """Updates a participant in an initiative tracker."""
     pass
 
 
-async def delete_initiative(channel_id: str | int):
+async def delete_initiative(channel_id: str | int, database: Database = database):
     """Deletes an initiative tracker."""
     pass
