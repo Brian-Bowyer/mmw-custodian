@@ -1,6 +1,7 @@
 from databases import Database
 from sqlalchemy import Column, ForeignKey, create_engine
 from sqlalchemy.orm import declarative_base
+from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.types import DateTime, Integer, String
 
 from app.constants import DATABASE_URL
@@ -14,13 +15,16 @@ class InitiativeTracker(Base):
     __tablename__ = "initiative_trackers"
 
     id = Column(Integer, primary_key=True)
-    channel_id = Column(String, nullable=False)
+    channel_id = Column(String, nullable=False, unique=True)
     current_round = Column(Integer, nullable=False, default=1)
     current_init = Column(Integer, nullable=True)
 
 
 class InitiativeMember(Base):
     __tablename__ = "initiative_members"
+    __table_args__ = (
+        UniqueConstraint("initiative_id", "player_name", name="unique_initiative_member"),
+    )
 
     id = Column(Integer, primary_key=True)
     initiative_id = Column(
