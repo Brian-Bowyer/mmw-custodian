@@ -89,6 +89,24 @@ async def test_add_participant_adds_a_participant():
 
 
 @pytest.mark.asyncio
+async def test_add_participant_errors_on_duplicate():
+    async with Database(DATABASE_URL, force_rollback=True) as db:
+        await initiative.create_initiative("123456", database=db)
+        tracker = await initiative.add_participant("123456", "Bob", 10, database=db)
+        assert tracker.participants == (initiative.Participant("Bob", 10),)
+        db_entry = await db.fetch_all(
+            "SELECT * FROM initiative_members WHERE initiative_id = :initiative_id",
+            {"initiative_id": tracker.id},
+        )
+        assert len(db_entry) == 1
+        assert db_entry[0]["player_name"] == "Bob"
+        assert db_entry[0]["init_value"] == 10
+
+        with pytest.raises(Exception):
+            await initiative.add_participant("123456", "Bob", 10, database=db)
+
+
+@pytest.mark.asyncio
 async def test_remove_participant_removes_a_participant():
     async with Database(DATABASE_URL, force_rollback=True) as db:
         await initiative.create_initiative("123456", database=db)
