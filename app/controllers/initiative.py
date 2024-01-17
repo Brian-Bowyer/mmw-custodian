@@ -78,6 +78,7 @@ async def get_initiative(
     )
     final_participants = [Participant(**(p._mapping)) for p in db_participants]
     return InitiativeTracker(
+        id=db_init["id"],
         channel_id=db_init["channel_id"],
         current_round=db_init["current_round"],
         participants=tuple(final_participants),  # type: ignore
@@ -107,6 +108,7 @@ async def add_participant(
     new_participant = Participant(name=player_name, initiative=initiative)
     new_participants = tracker.participants + (new_participant,)
     new_tracker = InitiativeTracker(
+        id=tracker.id,
         channel_id=tracker.channel_id,
         current_round=tracker.current_round,
         participants=new_participants,
