@@ -53,7 +53,7 @@ class InitiativeTracker:
 
 async def create_initiative(
     channel_id: str | int, current_round: int = 1, database: Database = database
-):
+) -> InitiativeTracker:
     """Creates an initiative tracker."""
     await database.execute(
         "INSERT INTO initiative_trackers (channel_id, current_round) VALUES (:channel_id, :current_round)",
@@ -88,6 +88,14 @@ async def get_initiative(
         channel_id=db_init["channel_id"],
         current_round=db_init["current_round"],
         participants=tuple(final_participants),  # type: ignore
+    )
+
+
+async def delete_initiative(channel_id: str | int, database: Database = database):
+    """Deletes an initiative tracker."""
+    await database.execute(
+        "DELETE FROM initiative_trackers WHERE channel_id = :channel_id",
+        {"channel_id": str(channel_id)},
     )
 
 
@@ -173,8 +181,3 @@ async def update_participant(
         participants=updated_participants,  # type: ignore
     )
     return updated_tracker
-
-
-async def delete_initiative(channel_id: str | int, database: Database = database):
-    """Deletes an initiative tracker."""
-    pass
