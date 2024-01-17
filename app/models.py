@@ -34,6 +34,6 @@ class InitiativeMember(Base):
     )
     player_name = Column(String, nullable=False)
     init_value = Column(Integer, nullable=False)
-    tiebreaker = Column(Integer, nullable=True)
+    tiebreaker = Column(Integer, nullable=False, default=0)
 
     deleted_at = Column(DateTime, nullable=True)
