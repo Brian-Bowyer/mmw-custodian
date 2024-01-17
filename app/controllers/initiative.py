@@ -32,7 +32,7 @@ class InitiativeTracker:
     id: int
     channel_id: str | int
     current_round: int
-    participants: tuple[Participant] = field(default_factory=tuple)  # type: ignore
+    participants: tuple[Participant, ...] = field(default_factory=tuple)
 
     def __post_init__(self):
         """Sorts the participants by initiative and tiebreaker."""
@@ -87,7 +87,7 @@ async def get_initiative(
         id=db_init["id"],
         channel_id=db_init["channel_id"],
         current_round=db_init["current_round"],
-        participants=tuple(final_participants),  # type: ignore
+        participants=tuple(final_participants),
     )
 
 
@@ -125,7 +125,7 @@ async def add_participant(
         id=tracker.id,
         channel_id=tracker.channel_id,
         current_round=tracker.current_round,
-        participants=new_participants,  # type: ignore
+        participants=new_participants,
     )
     return new_tracker
 
@@ -146,7 +146,7 @@ async def remove_participant(
         id=tracker.id,
         channel_id=tracker.channel_id,
         current_round=tracker.current_round,
-        participants=new_participants,  # type: ignore
+        participants=new_participants,
     )
 
     return new_tracker
@@ -178,6 +178,6 @@ async def update_participant(
         id=tracker.id,
         channel_id=tracker.channel_id,
         current_round=tracker.current_round,
-        participants=updated_participants,  # type: ignore
+        participants=updated_participants,
     )
     return updated_tracker
