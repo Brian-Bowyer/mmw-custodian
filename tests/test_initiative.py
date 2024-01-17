@@ -41,22 +41,31 @@ async def test_get_initiative_errors_if_no_initiative():
 @pytest.mark.asyncio
 async def test_add_participant_adds_a_participant():
     async with Database(DATABASE_URL, force_rollback=True) as db:
-        await initiative.create_initiative("123456", database=db)
-        await initiative.add_participant("123456", "Bob", 10, database=db)
-        db_entry = await db.fetch_one(
-            "SELECT * FROM initiative_trackers WHERE channel_id = '123456'"
+        tracker = await initiative.create_initiative("123456", database=db)
+        result = await initiative.add_participant("123456", "Bob", 10, database=db)
+        assert result.participants == (initiative.Participant("Bob", 10),)
+        db_entry = await db.fetch_all(
+            "SELECT * FROM initiative_members WHERE initiative_id = :initiative_id",
+            {"initiative_id": tracker.id},
         )
-        assert db_entry is not None
-        assert db_entry["participants"] == [{"name": "Bob", "initiative": 10}]
+        assert len(db_entry) == 1
+        assert db_entry[0]["player_name"] == "Bob"
+        assert db_entry[0]["init_value"] == 10
 
-        await initiative.add_participant("123456", "Alice", 15, database=db)
-        db_entry = await db.fetch_one(
-            "SELECT * FROM initiative_trackers WHERE channel_id = '123456'"
+        result2 = await initiative.add_participant("123456", "Alice", 15, database=db)
+        assert result2.participants == (
+            initiative.Participant("Alice", 15),
+            initiative.Participant("Bob", 10),
         )
-        assert db_entry["participants"] == [
-            {"name": "Alice", "initiative": 15},
-            {"name": "Bob", "initiative": 10},
-        ]
+        db_entry = await db.fetch_all(
+            "SELECT * FROM initiative_members WHERE initiative_id = :initiative_id",
+            {"initiative_id": tracker.id},
+        )
+        assert len(db_entry) == 2
+        assert db_entry[0]["player_name"] == "Bob"
+        assert db_entry[0]["init_value"] == 10
+        assert db_entry[1]["player_name"] == "Alice"
+        assert db_entry[1]["init_value"] == 15
 
 
 @pytest.mark.asyncio

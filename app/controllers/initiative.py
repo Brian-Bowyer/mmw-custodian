@@ -55,12 +55,11 @@ async def create_initiative(
     channel_id: str | int, current_round: int = 1, database: Database = database
 ):
     """Creates an initiative tracker."""
-    log.info("Creating initiative tracker...")
     await database.execute(
         "INSERT INTO initiative_trackers (channel_id, current_round) VALUES (:channel_id, :current_round)",
         {"channel_id": str(channel_id), "current_round": current_round},
     )
-    log.info("Initiative tracker created!")
+    return await get_initiative(channel_id, database=database)
 
 
 async def get_initiative(
@@ -76,7 +75,14 @@ async def get_initiative(
         "SELECT * FROM initiative_members WHERE initiative_id = :initiative_id",
         {"initiative_id": db_init["id"]},
     )
-    final_participants = [Participant(**(p._mapping)) for p in db_participants]
+    final_participants = [
+        Participant(
+            name=p._mapping["player_name"],
+            initiative=p["init_value"],
+            tiebreaker=p["tiebreaker"],
+        )
+        for p in db_participants
+    ]
     return InitiativeTracker(
         id=db_init["id"],
         channel_id=db_init["channel_id"],
@@ -111,7 +117,7 @@ async def add_participant(
         id=tracker.id,
         channel_id=tracker.channel_id,
         current_round=tracker.current_round,
-        participants=new_participants,
+        participants=new_participants,  # type: ignore
     )
     return new_tracker
 
