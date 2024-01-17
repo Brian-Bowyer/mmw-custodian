@@ -126,7 +126,22 @@ async def remove_participant(
     channel_id: str | int, player_name: str, database: Database = database
 ) -> InitiativeTracker:
     """Removes a character from an initiative tracker."""
-    pass
+    tracker = await get_initiative(channel_id, database=database)
+
+    await database.execute(
+        "DELETE FROM initiative_members WHERE initiative_id = :initiative_id AND player_name = :player_name",
+        {"initiative_id": tracker.id, "player_name": player_name},
+    )
+
+    new_participants = tuple(p for p in tracker.participants if p.name != player_name)
+    new_tracker = InitiativeTracker(
+        id=tracker.id,
+        channel_id=tracker.channel_id,
+        current_round=tracker.current_round,
+        participants=new_participants,  # type: ignore
+    )
+
+    return new_tracker
 
 
 async def update_participant(
@@ -139,7 +154,7 @@ async def update_participant(
     tracker = await get_initiative(channel_id, database=database)
 
     await database.execute(
-        "UPDATE initiative_members SET init_value = :init_value, player_name = :player_name WHERE initiative_id = :initiative_id",
+        "UPDATE initiative_members SET init_value = :init_value WHERE initiative_id = :initiative_id AND player_name = :player_name",
         {
             "initiative_id": tracker.id,
             "player_name": player_name,
