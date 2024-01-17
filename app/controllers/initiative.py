@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 class Participant:
     name: str = field(compare=False)
     initiative: int
-    tiebreaker: int | None = None
+    tiebreaker: int = 0
 
     def __str__(self):
         if self.tiebreaker is None:
@@ -104,6 +104,7 @@ async def add_participant(
     channel_id: str | int,
     player_name: str,
     initiative: int,
+    tiebreaker: int = 0,
     database: Database = database,
 ) -> InitiativeTracker:
     """Adds a character to an initiative tracker."""
@@ -112,11 +113,12 @@ async def add_participant(
 
     try:
         await database.execute(
-            "INSERT INTO initiative_members (initiative_id, player_name, init_value) VALUES (:initiative_id, :player_name, :init_value)",
+            "INSERT INTO initiative_members (initiative_id, player_name, init_value, tiebreaker) VALUES (:initiative_id, :player_name, :init_value, :tiebreaker)",
             {
                 "initiative_id": tracker.id,
                 "player_name": player_name,
                 "init_value": initiative,
+                "tiebreaker": tiebreaker,
             },
         )
     except UniqueViolationError:
@@ -126,7 +128,9 @@ async def add_participant(
 
     log.info("Participant added!")
 
-    new_participant = Participant(name=player_name, initiative=initiative)
+    new_participant = Participant(
+        name=player_name, initiative=initiative, tiebreaker=tiebreaker
+    )
     new_participants = tracker.participants + (new_participant,)
     new_tracker = InitiativeTracker(
         id=tracker.id,

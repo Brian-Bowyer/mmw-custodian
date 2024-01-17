@@ -107,6 +107,37 @@ async def test_add_participant_errors_on_duplicate():
 
 
 @pytest.mark.asyncio
+async def test_participant_order_is_correct():
+    async with Database(DATABASE_URL, force_rollback=True) as db:
+        await initiative.create_initiative("123456", database=db)
+        tracker = await initiative.add_participant("123456", "Alice", 15, database=db)
+        tracker = await initiative.add_participant("123456", "Bob", 10, database=db)
+        tracker = await initiative.add_participant("123456", "Charlie", 5, database=db)
+        tracker = await initiative.add_participant(
+            "123456", "Deborah", 15, tiebreaker=99, database=db
+        )
+        tracker = await initiative.add_participant(
+            "123456", "Eve", 15, tiebreaker=-10, database=db
+        )
+        tracker = await initiative.add_participant("123456", "Frank", 15, database=db)
+        tracker = await initiative.add_participant("123456", "Aabria", 15, database=db)
+
+        # RULES
+        # 1. Sort by initiative value, descending
+        # 2. Sort by tiebreaker, descending (no tiebreaker = 0)
+        # 3. Failing that, recent entires go last
+        assert tracker.participants == (
+            initiative.Participant("Deborah", 15, tiebreaker=99),
+            initiative.Participant("Alice", 15),
+            initiative.Participant("Frank", 15),
+            initiative.Participant("Aabria", 15),
+            initiative.Participant("Eve", 15, tiebreaker=-10),
+            initiative.Participant("Bob", 10),
+            initiative.Participant("Charlie", 5),
+        )
+
+
+@pytest.mark.asyncio
 async def test_remove_participant_removes_a_participant():
     async with Database(DATABASE_URL, force_rollback=True) as db:
         await initiative.create_initiative("123456", database=db)
