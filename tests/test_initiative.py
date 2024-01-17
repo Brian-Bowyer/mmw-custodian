@@ -3,7 +3,7 @@ from databases import Database
 
 from app.constants import DATABASE_URL
 from app.controllers import initiative
-from app.errors import NotFoundError
+from app.errors import AlreadyExistsError, NotFoundError
 
 
 # NOTE: doing the inefficient thing and creating a new Database object for each test
@@ -102,7 +102,7 @@ async def test_add_participant_errors_on_duplicate():
         assert db_entry[0]["player_name"] == "Bob"
         assert db_entry[0]["init_value"] == 10
 
-        with pytest.raises(Exception):
+        with pytest.raises(AlreadyExistsError):
             await initiative.add_participant("123456", "Bob", 10, database=db)
 
 

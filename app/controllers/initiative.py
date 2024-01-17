@@ -2,9 +2,10 @@ import logging
 from bisect import insort  # adds to a list in sorted order
 from dataclasses import dataclass, field
 
+from asyncpg.exceptions import UniqueViolationError
 from databases import Database
 
-from app.errors import NotFoundError
+from app.errors import AlreadyExistsError, NotFoundError
 from app.models import database
 
 # TODO transactions
@@ -109,14 +110,20 @@ async def add_participant(
     log.info("Adding participant...")
     tracker = await get_initiative(channel_id, database=database)
 
-    await database.execute(
-        "INSERT INTO initiative_members (initiative_id, player_name, init_value) VALUES (:initiative_id, :player_name, :init_value)",
-        {
-            "initiative_id": tracker.id,
-            "player_name": player_name,
-            "init_value": initiative,
-        },
-    )
+    try:
+        await database.execute(
+            "INSERT INTO initiative_members (initiative_id, player_name, init_value) VALUES (:initiative_id, :player_name, :init_value)",
+            {
+                "initiative_id": tracker.id,
+                "player_name": player_name,
+                "init_value": initiative,
+            },
+        )
+    except UniqueViolationError:
+        raise AlreadyExistsError(
+            f"Participant {player_name} already exists in this initiative!"
+        )
+
     log.info("Participant added!")
 
     new_participant = Participant(name=player_name, initiative=initiative)
