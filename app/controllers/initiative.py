@@ -56,10 +56,16 @@ async def create_initiative(
     channel_id: str | int, current_round: int = 1, database: Database = database
 ) -> InitiativeTracker:
     """Creates an initiative tracker."""
-    await database.execute(
-        "INSERT INTO initiative_trackers (channel_id, current_round) VALUES (:channel_id, :current_round)",
-        {"channel_id": str(channel_id), "current_round": current_round},
-    )
+    try:
+        await database.execute(
+            "INSERT INTO initiative_trackers (channel_id, current_round) VALUES (:channel_id, :current_round)",
+            {"channel_id": str(channel_id), "current_round": current_round},
+        )
+    except UniqueViolationError:
+        raise AlreadyExistsError(
+            f"Initiative tracker for channel {channel_id} already exists!"
+        )
+
     return await get_initiative(channel_id, database=database)
 
 
@@ -78,7 +84,7 @@ async def get_initiative(
     )
     final_participants = [
         Participant(
-            name=p._mapping["player_name"],
+            name=p["player_name"],
             initiative=p["init_value"],
             tiebreaker=p["tiebreaker"],
         )
@@ -108,7 +114,6 @@ async def add_participant(
     database: Database = database,
 ) -> InitiativeTracker:
     """Adds a character to an initiative tracker."""
-    log.info("Adding participant...")
     tracker = await get_initiative(channel_id, database=database)
 
     try:
@@ -125,8 +130,6 @@ async def add_participant(
         raise AlreadyExistsError(
             f"Participant {player_name} already exists in this initiative!"
         )
-
-    log.info("Participant added!")
 
     new_participant = Participant(
         name=player_name, initiative=initiative, tiebreaker=tiebreaker

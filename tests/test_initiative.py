@@ -26,6 +26,14 @@ async def test_create_initiative_creates_an_initiative():
 
 
 @pytest.mark.asyncio
+async def test_create_initiative_errors_if_already_exists():
+    async with Database(DATABASE_URL, force_rollback=True) as db:
+        await initiative.create_initiative("123456", database=db)
+        with pytest.raises(AlreadyExistsError):
+            await initiative.create_initiative("123456", database=db)
+
+
+@pytest.mark.asyncio
 @pytest.mark.asyncio
 async def test_get_initiative_gets_an_initiative():
     async with Database(DATABASE_URL, force_rollback=True) as db:
@@ -160,6 +168,15 @@ async def test_remove_participant_removes_a_participant():
         assert len(db_entry) == 0
 
 
+@pytest.mark.skip(reason="Still thinking of a good way to do this")
+@pytest.mark.asyncio
+async def test_remove_participant_errors_if_not_present():
+    async with Database(DATABASE_URL, force_rollback=True) as db:
+        await initiative.create_initiative("123456", database=db)
+        with pytest.raises(NotFoundError):
+            await initiative.remove_participant("123456", "Bob", database=db)
+
+
 @pytest.mark.asyncio
 async def test_update_participant_updates_an_initiative():
     async with Database(DATABASE_URL, force_rollback=True) as db:
@@ -183,3 +200,12 @@ async def test_update_participant_updates_an_initiative():
         assert len(db_entry) == 1
         assert db_entry[0]["player_name"] == "Bob"
         assert db_entry[0]["init_value"] == 15
+
+
+@pytest.mark.skip(reason="Still thinking of a good way to do this")
+@pytest.mark.asyncio
+async def test_update_participant_errors_if_not_present():
+    async with Database(DATABASE_URL, force_rollback=True) as db:
+        await initiative.create_initiative("123456", database=db)
+        with pytest.raises(NotFoundError):
+            await initiative.update_participant("123456", "Bob", 15, database=db)
