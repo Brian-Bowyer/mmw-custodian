@@ -80,9 +80,11 @@ async def test_add_participant_adds_a_participant():
         assert db_entry[0]["player_name"] == "Bob"
         assert db_entry[0]["init_value"] == 10
 
-        tracker = await initiative.add_participant("123456", "Alice", 15, database=db)
+        tracker = await initiative.add_participant(
+            "123456", "Alice", 15, tiebreaker=1, database=db
+        )
         assert tracker.participants == (
-            initiative.Participant("Alice", 15),
+            initiative.Participant("Alice", 15, tiebreaker=1),
             initiative.Participant("Bob", 10),
         )
         db_entry = await db.fetch_all(
@@ -94,6 +96,7 @@ async def test_add_participant_adds_a_participant():
         assert db_entry[0]["init_value"] == 10
         assert db_entry[1]["player_name"] == "Alice"
         assert db_entry[1]["init_value"] == 15
+        assert db_entry[1]["tiebreaker"] == 1
 
 
 @pytest.mark.asyncio
@@ -191,8 +194,10 @@ async def test_update_participant_updates_an_initiative():
         assert db_entry[0]["player_name"] == "Bob"
         assert db_entry[0]["init_value"] == 10
 
-        tracker = await initiative.update_participant("123456", "Bob", 15, database=db)
-        assert tracker.participants == (initiative.Participant("Bob", 15),)
+        tracker = await initiative.update_participant(
+            "123456", "Bob", 15, tiebreaker=2, database=db
+        )
+        assert tracker.participants == (initiative.Participant("Bob", 15, tiebreaker=2),)
         db_entry = await db.fetch_all(
             "SELECT * FROM initiative_members WHERE initiative_id = :initiative_id",
             {"initiative_id": tracker.id},
@@ -200,6 +205,7 @@ async def test_update_participant_updates_an_initiative():
         assert len(db_entry) == 1
         assert db_entry[0]["player_name"] == "Bob"
         assert db_entry[0]["init_value"] == 15
+        assert db_entry[0]["tiebreaker"] == 2
 
 
 @pytest.mark.skip(reason="Still thinking of a good way to do this")

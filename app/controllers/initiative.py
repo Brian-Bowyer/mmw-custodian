@@ -170,21 +170,25 @@ async def update_participant(
     channel_id: str | int,
     player_name: str,
     initiative: int,
+    tiebreaker: int = 0,
     database: Database = database,
 ) -> InitiativeTracker:
     """Updates a character in an initiative tracker."""
     tracker = await get_initiative(channel_id, database=database)
 
     await database.execute(
-        "UPDATE initiative_members SET init_value = :init_value WHERE initiative_id = :initiative_id AND player_name = :player_name",
+        "UPDATE initiative_members SET init_value = :init_value, tiebreaker = :tiebreaker WHERE initiative_id = :initiative_id AND player_name = :player_name",
         {
             "initiative_id": tracker.id,
             "player_name": player_name,
             "init_value": initiative,
+            "tiebreaker": tiebreaker,
         },
     )
 
-    updated_participant = Participant(name=player_name, initiative=initiative)
+    updated_participant = Participant(
+        name=player_name, initiative=initiative, tiebreaker=tiebreaker
+    )
     updated_participants = tuple(
         p if p.name != player_name else updated_participant for p in tracker.participants
     )
