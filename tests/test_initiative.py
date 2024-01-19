@@ -215,3 +215,18 @@ async def test_update_participant_errors_if_not_present():
         await initiative.create_initiative("123456", database=db)
         with pytest.raises(NotFoundError):
             await initiative.update_participant("123456", "Bob", 15, database=db)
+
+
+@pytest.mark.asyncio
+async def test_next_participant_goes_to_the_next_participant():
+    pass
+
+
+@pytest.mark.asyncio
+async def test_previous_participant_goes_to_the_previous_participant():
+    pass
+
+
+@pytest.mark.asyncio
+async def text_goto_participant_goes_to_the_specified_participant():
+    pass

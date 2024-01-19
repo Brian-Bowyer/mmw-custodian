@@ -199,3 +199,21 @@ async def update_participant(
         participants=updated_participants,
     )
     return updated_tracker
+
+
+async def next_participant(
+    channel_id: str | int,
+    database: Database = database,
+) -> InitiativeTracker:
+    """Moves to the next participant in an initiative tracker."""
+    tracker = await get_initiative(channel_id, database=database)
+
+
+async def previous_participant():
+    """Moves to the previous participant in an initiative tracker."""
+    pass
+
+
+async def goto_participant():
+    """Moves to a specific participant in an initiative tracker."""
+    pass
