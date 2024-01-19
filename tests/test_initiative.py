@@ -219,14 +219,14 @@ async def test_update_participant_errors_if_not_present():
 
 @pytest.mark.asyncio
 async def test_next_participant_goes_to_the_next_participant():
-    pass
+    raise NotImplementedError
 
 
 @pytest.mark.asyncio
 async def test_previous_participant_goes_to_the_previous_participant():
-    pass
+    raise NotImplementedError
 
 
 @pytest.mark.asyncio
-async def text_goto_participant_goes_to_the_specified_participant():
-    pass
+async def test_goto_participant_goes_to_the_specified_participant():
+    raise NotImplementedError
