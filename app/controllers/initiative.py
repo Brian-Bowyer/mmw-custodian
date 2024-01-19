@@ -51,6 +51,16 @@ class InitiativeTracker:
 
         return f"Round {self.current_round}\n" + f"Participants:\n" + participant_list
 
+    def as_dict(self):
+        return {p.name: p.initiative for p in self.participants}
+
+    def find_participant(self, name: str) -> Participant | None:
+        """Finds a participant by name."""
+        for participant in self.participants:
+            if participant.name == name:
+                return participant
+        return None
+
 
 async def create_initiative(
     channel_id: str | int, current_round: int = 1, database: Database = database
