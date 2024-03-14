@@ -17,7 +17,7 @@ class InitiativeTracker(Base):
     id = Column(Integer, primary_key=True)
     channel_id = Column(String, nullable=False, unique=True)
     current_round = Column(Integer, nullable=False, default=1)
-    current_init = Column(Integer, nullable=True)
+    current_index = Column(Integer, nullable=False, default=0)
 
 
 class InitiativeMember(Base):
