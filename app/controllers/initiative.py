@@ -33,7 +33,6 @@ class InitiativeTracker:
     id: int
     channel_id: str | int
     current_round: int
-    current_index: int = 0
     participants: tuple[Participant, ...] = field(default_factory=tuple)
 
     def __post_init__(self):
@@ -107,26 +106,6 @@ async def get_initiative(
         current_round=db_init["current_round"],
         participants=tuple(final_participants),
     )
-
-
-async def update_initiative(
-    channel_id: str | int, current_round: int, database: Database = database
-) -> InitiativeTracker:
-    """Updates the current round of an initiative tracker."""
-    tracker = await get_initiative(channel_id, database=database)
-
-    await database.execute(
-        "UPDATE initiative_trackers SET current_round = :current_round WHERE channel_id = :channel_id",
-        {"current_round": current_round, "channel_id": str(channel_id)},
-    )
-
-    updated_tracker = InitiativeTracker(
-        id=tracker.id,
-        channel_id=tracker.channel_id,
-        current_round=current_round,
-        participants=tracker.participants,
-    )
-    return updated_tracker
 
 
 async def delete_initiative(channel_id: str | int, database: Database = database):
@@ -238,8 +217,6 @@ async def next_participant(
 ) -> InitiativeTracker:
     """Moves to the next participant in an initiative tracker."""
     tracker = await get_initiative(channel_id, database=database)
-
-    return tracker
 
 
 async def previous_participant():
