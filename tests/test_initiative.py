@@ -55,13 +55,13 @@ async def test_delete_initiative_deletes_an_initiative(channel_id):
     async with Database(DATABASE_URL, force_rollback=True) as db:
         await initiative.create_initiative(channel_id, database=db)
         db_entry = await db.fetch_one(
-            "SELECT * FROM initiative_trackers WHERE channel_id = '123456'"
+            f"SELECT * FROM initiative_trackers WHERE channel_id = '{channel_id}'"
         )
         assert db_entry is not None
 
         await initiative.delete_initiative(channel_id, database=db)
         db_entry = await db.fetch_one(
-            "SELECT * FROM initiative_trackers WHERE channel_id = '123456'"
+            f"SELECT * FROM initiative_trackers WHERE channel_id = '{channel_id}'"
         )
         assert db_entry is None
 
@@ -224,10 +224,11 @@ async def test_next_participant_goes_to_the_next_participant(channel_id):
         tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
         tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
         tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+
         assert tracker.current_participant == initiative.Participant("Alice", 15)
-        initiative.next_participant()
+        tracker = await initiative.next_participant(channel_id, database=db)
         assert tracker.current_participant == initiative.Participant("Bob", 10)
-        initiative.next_participant()
+        tracker = await initiative.next_participant(channel_id, database=db)
         assert tracker.current_participant == initiative.Participant("Charlie", 5)
 
 

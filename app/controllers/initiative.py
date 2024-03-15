@@ -238,7 +238,19 @@ async def next_participant(
     """Moves to the next participant in an initiative tracker."""
     tracker = await get_initiative(channel_id, database=database)
 
-    return tracker
+    await database.execute(
+        "UPDATE initiative_trackers SET current_index = :current_index WHERE id = :id",
+        {"current_index": tracker.current_index + 1, "id": tracker.id},
+    )
+
+    updated_tracker = InitiativeTracker(
+        id=tracker.id,
+        channel_id=tracker.channel_id,
+        current_round=tracker.current_round,
+        current_index=tracker.current_index + 1,
+        participants=tracker.participants,
+    )
+    return updated_tracker
 
 
 async def previous_participant():
