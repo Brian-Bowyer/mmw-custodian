@@ -1,6 +1,6 @@
 import pytest
 
 
-@pytest.mark.fixture
+@pytest.fixture(scope="function")
 def channel_id():
     return "1234567890"
