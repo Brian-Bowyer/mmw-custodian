@@ -27,12 +27,16 @@ class Participant:
     def as_dict(self):
         return {self.initiative: self.name}
 
+    def is_before(self, other) -> bool:
+        return (self.initiative, self.tiebreaker) < (other.initiative, other.tiebreaker)
+
 
 @dataclass(frozen=True)
 class InitiativeTracker:
     id: int
     channel_id: str | int
     current_round: int
+    current_index: int
     participants: tuple[Participant, ...] = field(default_factory=tuple)
 
     def __post_init__(self):
@@ -61,15 +65,27 @@ class InitiativeTracker:
                 return participant
         return None
 
+    @property
+    def current_participant(self) -> Participant:
+        """Returns the current participant."""
+        return self.participants[self.current_index]
+
 
 async def create_initiative(
-    channel_id: str | int, current_round: int = 1, database: Database = database
+    channel_id: str | int,
+    current_round: int = 1,
+    current_index=0,
+    database: Database = database,
 ) -> InitiativeTracker:
     """Creates an initiative tracker."""
     try:
         await database.execute(
-            "INSERT INTO initiative_trackers (channel_id, current_round) VALUES (:channel_id, :current_round)",
-            {"channel_id": str(channel_id), "current_round": current_round},
+            "INSERT INTO initiative_trackers (channel_id, current_round, current_index) VALUES (:channel_id, :current_round, :current_index)",
+            {
+                "channel_id": str(channel_id),
+                "current_round": current_round,
+                "current_index": current_index,
+            },
         )
     except UniqueViolationError:
         raise AlreadyExistsError(
@@ -104,6 +120,7 @@ async def get_initiative(
         id=db_init["id"],
         channel_id=db_init["channel_id"],
         current_round=db_init["current_round"],
+        current_index=db_init["current_index"],
         participants=tuple(final_participants),
     )
 
@@ -149,6 +166,7 @@ async def add_participant(
         id=tracker.id,
         channel_id=tracker.channel_id,
         current_round=tracker.current_round,
+        current_index=tracker.current_index,
         participants=new_participants,
     )
     return new_tracker
@@ -170,6 +188,7 @@ async def remove_participant(
         id=tracker.id,
         channel_id=tracker.channel_id,
         current_round=tracker.current_round,
+        current_index=tracker.current_index,
         participants=new_participants,
     )
 
@@ -206,6 +225,7 @@ async def update_participant(
         id=tracker.id,
         channel_id=tracker.channel_id,
         current_round=tracker.current_round,
+        current_index=tracker.current_index,
         participants=updated_participants,
     )
     return updated_tracker
@@ -217,6 +237,8 @@ async def next_participant(
 ) -> InitiativeTracker:
     """Moves to the next participant in an initiative tracker."""
     tracker = await get_initiative(channel_id, database=database)
+
+    return tracker
 
 
 async def previous_participant():
