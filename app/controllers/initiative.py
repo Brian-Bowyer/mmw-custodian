@@ -28,7 +28,11 @@ class Participant:
         return {self.initiative: self.name}
 
     def is_before(self, other) -> bool:
-        return (self.initiative, self.tiebreaker) < (other.initiative, other.tiebreaker)
+        """Returns True if this participant is before the other."""
+        if other is None:
+            return False
+
+        return self > other
 
 
 @dataclass(frozen=True)
@@ -66,9 +70,12 @@ class InitiativeTracker:
         return None
 
     @property
-    def current_participant(self) -> Participant:
+    def current_participant(self) -> Participant | None:
         """Returns the current participant."""
-        return self.participants[self.current_index]
+        if len(self.participants) > 0:
+            return self.participants[self.current_index]
+        else:
+            return None
 
 
 async def create_initiative(
@@ -161,14 +168,17 @@ async def add_participant(
     new_participant = Participant(
         name=player_name, initiative=initiative, tiebreaker=tiebreaker
     )
-    new_participants = tracker.participants + (new_participant,)
-    new_tracker = InitiativeTracker(
-        id=tracker.id,
-        channel_id=tracker.channel_id,
-        current_round=tracker.current_round,
-        current_index=tracker.current_index,
-        participants=new_participants,
+    if new_participant.is_before(tracker.current_participant):
+        new_index = tracker.current_index + 1
+    else:
+        new_index = tracker.current_index
+
+    await database.execute(
+        "UPDATE initiative_trackers SET current_index = :new_index WHERE id = :id",
+        {"new_index": new_index, "id": tracker.id},
     )
+
+    new_tracker = await get_initiative(channel_id, database=database)
     return new_tracker
 
 
@@ -183,15 +193,7 @@ async def remove_participant(
         {"initiative_id": tracker.id, "player_name": player_name},
     )
 
-    new_participants = tuple(p for p in tracker.participants if p.name != player_name)
-    new_tracker = InitiativeTracker(
-        id=tracker.id,
-        channel_id=tracker.channel_id,
-        current_round=tracker.current_round,
-        current_index=tracker.current_index,
-        participants=new_participants,
-    )
-
+    new_tracker = await get_initiative(channel_id, database=database)
     return new_tracker
 
 
@@ -215,19 +217,7 @@ async def update_participant(
         },
     )
 
-    updated_participant = Participant(
-        name=player_name, initiative=initiative, tiebreaker=tiebreaker
-    )
-    updated_participants = tuple(
-        p if p.name != player_name else updated_participant for p in tracker.participants
-    )
-    updated_tracker = InitiativeTracker(
-        id=tracker.id,
-        channel_id=tracker.channel_id,
-        current_round=tracker.current_round,
-        current_index=tracker.current_index,
-        participants=updated_participants,
-    )
+    updated_tracker = await get_initiative(channel_id, database=database)
     return updated_tracker
 
 
@@ -240,24 +230,47 @@ async def next_participant(
 
     await database.execute(
         "UPDATE initiative_trackers SET current_index = :current_index WHERE id = :id",
-        {"current_index": tracker.current_index + 1, "id": tracker.id},
+        {
+            "current_index": (tracker.current_index + 1) % len(tracker.participants),
+            "id": tracker.id,
+        },
     )
 
-    updated_tracker = InitiativeTracker(
-        id=tracker.id,
-        channel_id=tracker.channel_id,
-        current_round=tracker.current_round,
-        current_index=tracker.current_index + 1,
-        participants=tracker.participants,
-    )
+    updated_tracker = await get_initiative(channel_id, database=database)
     return updated_tracker
 
 
-async def previous_participant():
+async def previous_participant(
+    channel_id: str | int, database: Database = database
+) -> InitiativeTracker:
     """Moves to the previous participant in an initiative tracker."""
-    pass
+    tracker = await get_initiative(channel_id, database=database)
+
+    await database.execute(
+        "UPDATE initiative_trackers SET current_index = :current_index WHERE id = :id",
+        {
+            "current_index": (tracker.current_index - 1) % len(tracker.participants),
+            "id": tracker.id,
+        },
+    )
+
+    updated_tracker = await get_initiative(channel_id, database=database)
+    return updated_tracker
 
 
-async def goto_participant():
+async def goto_participant(
+    channel_id: str | int, target_name: str, database: Database = database
+) -> InitiativeTracker:
     """Moves to a specific participant in an initiative tracker."""
-    pass
+    tracker = await get_initiative(channel_id, database=database)
+    target = tracker.find_participant(target_name)
+    if target is None:
+        raise NotFoundError(f"Participant {target_name} not found in this initiative!")
+
+    await database.execute(
+        "UPDATE initiative_trackers SET current_index = :current_index WHERE id = :id",
+        {"current_index": tracker.participants.index(target), "id": tracker.id},
+    )
+
+    updated_tracker = await get_initiative(channel_id, database=database)
+    return updated_tracker

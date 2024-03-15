@@ -218,6 +218,25 @@ async def test_update_participant_errors_if_not_present(channel_id):
 
 
 @pytest.mark.asyncio
+async def test_current_participant_does_not_change_when_participants_are_added(
+    channel_id,
+):
+    async with Database(DATABASE_URL, force_rollback=True) as db:
+        await initiative.create_initiative(channel_id, database=db)
+        tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
+        assert tracker.current_participant == initiative.Participant("Bob", 10)
+
+        tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
+        assert tracker.current_participant == initiative.Participant("Bob", 10)
+
+        tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+        assert tracker.current_participant == initiative.Participant("Bob", 10)
+
+        tracker = await initiative.add_participant(channel_id, "Deborah", 10, database=db)
+        assert tracker.current_participant == initiative.Participant("Bob", 10)
+
+
+@pytest.mark.asyncio
 async def test_next_participant_goes_to_the_next_participant(channel_id):
     async with Database(DATABASE_URL, force_rollback=True) as db:
         await initiative.create_initiative(channel_id, database=db)
@@ -233,10 +252,59 @@ async def test_next_participant_goes_to_the_next_participant(channel_id):
 
 
 @pytest.mark.asyncio
-async def test_previous_participant_goes_to_the_previous_participant():
-    pass
+async def test_next_participant_goes_to_the_first_participant_when_at_the_end(channel_id):
+    async with Database(DATABASE_URL, force_rollback=True) as db:
+        await initiative.create_initiative(channel_id, database=db)
+        tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
+        tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
+        tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+
+        tracker = await initiative.next_participant(channel_id, database=db)
+        tracker = await initiative.next_participant(channel_id, database=db)
+        tracker = await initiative.next_participant(channel_id, database=db)
+        assert tracker.current_participant == initiative.Participant("Alice", 15)
 
 
 @pytest.mark.asyncio
-async def test_goto_participant_goes_to_the_specified_participant():
-    pass
+async def test_previous_participant_goes_to_the_previous_participant(channel_id):
+    async with Database(DATABASE_URL, force_rollback=True) as db:
+        await initiative.create_initiative(channel_id, database=db)
+        tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
+        tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
+        tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+
+        tracker = await initiative.next_participant(channel_id, database=db)
+        tracker = await initiative.next_participant(channel_id, database=db)
+        assert tracker.current_participant == initiative.Participant("Charlie", 5)
+        tracker = await initiative.previous_participant(channel_id, database=db)
+        assert tracker.current_participant == initiative.Participant("Bob", 10)
+        tracker = await initiative.previous_participant(channel_id, database=db)
+        assert tracker.current_participant == initiative.Participant("Alice", 15)
+
+
+@pytest.mark.asyncio
+async def test_previous_participant_goes_to_the_last_participant_when_at_the_beginning(
+    channel_id,
+):
+    async with Database(DATABASE_URL, force_rollback=True) as db:
+        await initiative.create_initiative(channel_id, database=db)
+        tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
+        tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
+        tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+
+        tracker = await initiative.previous_participant(channel_id, database=db)
+        tracker = await initiative.previous_participant(channel_id, database=db)
+        tracker = await initiative.previous_participant(channel_id, database=db)
+        assert tracker.current_participant == initiative.Participant("Alice", 15)
+
+
+@pytest.mark.asyncio
+async def test_goto_participant_goes_to_the_specified_participant(channel_id):
+    async with Database(DATABASE_URL, force_rollback=True) as db:
+        await initiative.create_initiative(channel_id, database=db)
+        tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
+        tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
+        tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+
+        tracker = await initiative.goto_participant(channel_id, "Charlie", database=db)
+        assert tracker.current_participant == initiative.Participant("Charlie", 5)
