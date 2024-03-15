@@ -6,7 +6,7 @@ from sqlalchemy.types import DateTime, Integer, String
 
 from app.constants import DATABASE_URL
 
-Base = declarative_base()
+Base: type = declarative_base()
 engine = create_engine(DATABASE_URL)
 database = Database(DATABASE_URL)
 
