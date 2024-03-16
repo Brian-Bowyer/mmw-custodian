@@ -15,14 +15,15 @@ jobs:
         steps:
             - name: Check out the repository
               uses: actions/checkout@v3
+            - name: Create environment file
+              run: |
+                echo "SECRET_TOKEN=${{ secrets.SECRET_TOKEN }}" >> environment.env
+                echo "TESTING_SERVER=${{ secrets.TESTING_SERVER }}" >> environment.env
+                echo "POSTGRES_USER=${{ vars.POSTGRES_USER }}" >> environment.env
+                echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> environment.env
+                echo "POSTGRES_DB=${{ vars.POSTGRES_DB }}" >> environment.env
+                echo "POSTGRES_HOST=${{ vars.POSTGRES_HOST }}" >> environment.env
             - name: Run tests
               run: |
                 docker-compose up -d
                 docker-compose exec -T custodian pytest
-              env:
-                SECRET_TOKEN: ${{ secrets.SECRET_TOKEN }}
-                TESTING_SERVER: ${{ secrets.TESTING_SERVER }}
-                POSTGRES_USER: ${{ vars.POSTGRES_USER }}
-                POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-                POSTGRES_DB: ${{ vars.POSTGRES_DB }}
-                POSTGRES_HOST: ${{ vars.POSTGRES_HOST }}
