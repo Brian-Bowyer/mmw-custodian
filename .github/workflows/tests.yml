@@ -23,6 +23,8 @@ jobs:
                 echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> environment.env
                 echo POSTGRES_DB=${{ env.POSTGRES_DB }} >> environment.env
                 echo POSTGRES_HOST=${{ env.POSTGRES_HOST }} >> environment.env
+                echo DUMMY_SECRET=${{ secrets.DUMMY_SECRET }} >> environment.env
+                echo DUMMY_VAR=${{ vars.DUMMY_VAR }} >> environment.env
                 cat environment.env
             - name: Run tests
               run: |
