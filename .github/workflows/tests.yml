@@ -28,5 +28,5 @@ jobs:
                 TESTING_SERVER: ${{ secrets.TESTING_SERVER }}
                 POSTGRES_USER: ${{ vars.POSTGRES_USER }}
                 POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-                POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-                POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+                POSTGRES_DB: ${{ vars.POSTGRES_DB }}
+                POSTGRES_HOST: ${{ vars.POSTGRES_HOST }}
