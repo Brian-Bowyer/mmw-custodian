@@ -24,7 +24,19 @@ jobs:
                 echo "POSTGRES_PASSWORD=${{ vars.POSTGRES_PASSWORD }}" >> environment.env
                 echo "POSTGRES_DB=${{ vars.POSTGRES_DB }}" >> environment.env
                 echo "POSTGRES_HOST=${{ vars.POSTGRES_HOST }}" >> environment.env
-            - name: Run tests
+            - name: Bring up docker-compose
+              env:
+                COMPOSE_INTERACTIVE_NO_CLI: 1
               run: |
                 docker-compose up -d
+            - name: Check running containers
+              run: |
+                docker-compose ps -a
+            - name: Check logs
+              run: |
+                docker-compose logs 
+            - name: Run tests
+              env:
+                COMPOSE_INTERACTIVE_NO_CLI: 1
+              run: |
                 docker-compose exec -T custodian pytest
