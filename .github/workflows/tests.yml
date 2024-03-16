@@ -8,6 +8,14 @@ on:
         branches:
         - main
 
+# env:
+#     SECRET_TOKEN: ${{ secrets.SECRET_TOKEN }}
+#     TESTING_SERVER: ${{ secrets.TESTING_SERVER }}
+#     POSTGRES_USER: ${{ vars.POSTGRES_USER }}
+#     POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+#     POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+#     POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+
 jobs:
     test:
         runs-on: ubuntu-latest
