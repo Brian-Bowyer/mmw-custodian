@@ -230,14 +230,16 @@ async def next_participant(
 ) -> InitiativeTracker:
     """Moves to the next participant in an initiative tracker."""
     tracker = await get_initiative(channel_id, database=database)
+    next_index = (tracker.current_index + 1) % len(tracker.participants)
 
     await database.execute(
         "UPDATE initiative_trackers SET current_index = :current_index, current_round = :current_round WHERE id = :id",
         {
-            "current_index": (tracker.current_index + 1) % len(tracker.participants),
+            "current_index": next_index,
             "current_round": (
+                # if we've wrapped around, increment the round
                 tracker.current_round + 1
-                if tracker.current_index == 0
+                if tracker.current_index > next_index
                 else tracker.current_round
             ),
             "id": tracker.id,
@@ -253,14 +255,16 @@ async def previous_participant(
 ) -> InitiativeTracker:
     """Moves to the previous participant in an initiative tracker."""
     tracker = await get_initiative(channel_id, database=database)
+    previous_index = (tracker.current_index - 1) % len(tracker.participants)
 
     await database.execute(
-        "UPDATE initiative_trackers SET current_index = :current_index WHERE id = :id",
+        "UPDATE initiative_trackers SET current_index = :current_index, current_round = :current_round WHERE id = :id",
         {
-            "current_index": (tracker.current_index - 1) % len(tracker.participants),
+            "current_index": previous_index,
             "current_round": (
+                # if we've wrapped backwards, decrement the round
                 tracker.current_round - 1
-                if tracker.current_index == len(tracker.participants) - 1
+                if tracker.current_index < previous_index
                 else tracker.current_round
             ),
             "id": tracker.id,
