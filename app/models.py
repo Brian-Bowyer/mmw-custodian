@@ -1,10 +1,11 @@
 from databases import Database
 from sqlalchemy import Column, ForeignKey, create_engine
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, validates
 from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.types import DateTime, Integer, String
 
 from app.constants import DATABASE_URL
+from app.errors import BacktrackError
 
 Base: type = declarative_base()
 engine = create_engine(DATABASE_URL)
@@ -18,6 +19,18 @@ class InitiativeTracker(Base):
     channel_id = Column(String, nullable=False, unique=True)
     current_round = Column(Integer, nullable=False, default=1)
     current_index = Column(Integer, nullable=False, default=0)
+
+    @validates("current_round")
+    def validate_current_round(self, key, value):
+        if value < 1:
+            raise BacktrackError("Current round cannot be less than 1")
+        return value
+
+    @validates("current_index")
+    def validate_current_index(self, key, value):
+        if value < 0:
+            raise BacktrackError("Current index cannot be less than 0")
+        return value
 
 
 class InitiativeMember(Base):
