@@ -26,13 +26,13 @@ class InitiativeTracker(Base):
 
     @validates("current_round")
     def validate_current_round(self, key, value):
-        if value < 1:
+        if not value >= 1:
             raise BacktrackError("Current round cannot be less than 1")
         return value
 
     @validates("current_index")
     def validate_current_index(self, key, value):
-        if value < 0:
+        if not value >= 0:
             raise BacktrackError("Current index cannot be less than 0")
         return value
 
