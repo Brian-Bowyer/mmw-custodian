@@ -232,9 +232,14 @@ async def next_participant(
     tracker = await get_initiative(channel_id, database=database)
 
     await database.execute(
-        "UPDATE initiative_trackers SET current_index = :current_index WHERE id = :id",
+        "UPDATE initiative_trackers SET current_index = :current_index, current_round = :current_round WHERE id = :id",
         {
             "current_index": (tracker.current_index + 1) % len(tracker.participants),
+            "current_round": (
+                tracker.current_round + 1
+                if tracker.current_index == 0
+                else tracker.current_round
+            ),
             "id": tracker.id,
         },
     )
@@ -253,6 +258,11 @@ async def previous_participant(
         "UPDATE initiative_trackers SET current_index = :current_index WHERE id = :id",
         {
             "current_index": (tracker.current_index - 1) % len(tracker.participants),
+            "current_round": (
+                tracker.current_round - 1
+                if tracker.current_index == len(tracker.participants) - 1
+                else tracker.current_round
+            ),
             "id": tracker.id,
         },
     )
