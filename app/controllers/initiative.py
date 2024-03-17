@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from asyncpg.exceptions import UniqueViolationError
 from databases import Database
 
-from app.errors import AlreadyExistsError, NotFoundError
+from app.errors import AlreadyExistsError, BacktrackError, NotFoundError
 from app.models import database
 
 # TODO transactions
@@ -256,6 +256,13 @@ async def previous_participant(
     """Moves to the previous participant in an initiative tracker."""
     tracker = await get_initiative(channel_id, database=database)
     previous_index = (tracker.current_index - 1) % len(tracker.participants)
+    previous_round = (
+        tracker.current_round - 1
+        if tracker.current_index < previous_index
+        else tracker.current_round
+    )
+    if previous_round < 1:
+        raise BacktrackError("Cannot go back before round 1")
 
     await database.execute(
         "UPDATE initiative_trackers SET current_index = :current_index, current_round = :current_round WHERE id = :id",
