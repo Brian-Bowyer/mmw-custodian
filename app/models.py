@@ -1,7 +1,7 @@
 from databases import Database
 from sqlalchemy import Column, ForeignKey, create_engine
 from sqlalchemy.orm import declarative_base, validates
-from sqlalchemy.schema import UniqueConstraint
+from sqlalchemy.schema import CheckConstraint, UniqueConstraint
 from sqlalchemy.types import DateTime, Integer, String
 
 from app.constants import DATABASE_URL
@@ -17,8 +17,12 @@ class InitiativeTracker(Base):
 
     id = Column(Integer, primary_key=True)
     channel_id = Column(String, nullable=False, unique=True)
-    current_round = Column(Integer, nullable=False, default=1)
-    current_index = Column(Integer, nullable=False, default=0)
+    current_round = Column(
+        Integer, CheckConstraint("current_round >= 1"), nullable=False, default=1
+    )
+    current_index = Column(
+        Integer, CheckConstraint("current_index >= 0"), nullable=False, default=0
+    )
 
     @validates("current_round")
     def validate_current_round(self, key, value):
