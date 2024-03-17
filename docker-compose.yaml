@@ -9,6 +9,11 @@ services:
       - environment.env
     ports:
       - 5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U custodian" ] # This shouldn't be hardcoded, fix this later
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   custodian:
     container_name: custodian
@@ -22,4 +27,7 @@ services:
     ports:
       - 80
     depends_on:
+      postgres:
+        condition: service_healthy
+    links:
       - postgres
