@@ -1,0 +1,49 @@
+name: Tests
+
+on: 
+    push:
+        branches:
+        - main
+    pull_request:
+        branches:
+        - main
+
+permissions:
+    issues: write
+    pull-requests: write
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out the repository
+              uses: actions/checkout@v3
+            - name: Create environment file
+              run: |
+                echo "SECRET_TOKEN=${{ secrets.SECRET_TOKEN }}" >> environment.env
+                echo "TESTING_SERVER=${{ secrets.TESTING_SERVER}}" >> environment.env
+                echo "POSTGRES_USER=${{ vars.POSTGRES_USER }}" >> environment.env
+                echo "POSTGRES_PASSWORD=${{ vars.POSTGRES_PASSWORD }}" >> environment.env
+                echo "POSTGRES_DB=${{ vars.POSTGRES_DB }}" >> environment.env
+                echo "POSTGRES_HOST=${{ vars.POSTGRES_HOST }}" >> environment.env
+            - name: Bring up docker-compose
+              env:
+                COMPOSE_INTERACTIVE_NO_CLI: 1
+              run: |
+                docker-compose up -d
+            - name: Check running containers
+              run: |
+                docker-compose ps -a
+            - name: Check logs
+              run: |
+                docker-compose logs 
+            - name: Run tests
+              env:
+                COMPOSE_INTERACTIVE_NO_CLI: 1
+              run: |
+                docker-compose exec -T custodian pytest --cov-report=xml --cov-report=term --cov=./app --junitxml=pytest.xml
+            - name: Coverage comment
+              uses: MishaKav/pytest-coverage-comment@main
+              with:
+                pytest-xml-coverage-path: ./pytest-coverage.xml
+                junitxml-path: ./pytest.xml

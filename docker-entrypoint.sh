@@ -1,3 +1,5 @@
 #!/bin/bash
-alembic upgrade head && echo "DB migrated"
+echo "Waiting for postgres..."
+alembic upgrade head
+echo "DB migrated"
 python3 -m app.main

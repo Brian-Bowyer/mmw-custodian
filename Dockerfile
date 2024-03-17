@@ -12,6 +12,6 @@ RUN /root/.local/bin/poetry install --no-interaction --no-ansi --no-root
 COPY . /app
 WORKDIR /app
 
-ENTRYPOINT [ "/app/docker-entrypoint.sh" ]
+CMD [ "/app/docker-entrypoint.sh" ]
 # CMD ["python3", "-m", "app.main"]
 # CMD ["tail", "-f", "/dev/null"]
