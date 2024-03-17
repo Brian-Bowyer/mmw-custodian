@@ -53,11 +53,14 @@ class InitiativeTracker:
     def __str__(self):
         """Returns a string representation of the initiative tracker."""
         if self.participants:
-            participant_list = "\n".join(str(p) for p in self.participants)
+            participant_list = "\n".join(
+                f"{p} {' <==' if p == self.current_participant else ''}"
+                for p in self.participants
+            )
         else:
             participant_list = "Nobody!\n"
 
-        return f"Round {self.current_round}\n" + f"Participants:\n" + participant_list
+        return f"Round {self.current_round}\n Participants:\n {participant_list}"
 
     def as_dict(self):
         return {p.name: p.initiative for p in self.participants}
