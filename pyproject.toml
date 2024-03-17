@@ -11,7 +11,7 @@ psycopg2 = "^2.9.9"
 pytest-asyncio = "^0.23.3"
 alembic = "^1.13.1"
 sqlalchemy = "1.4.51"
-databases = {extras = ["asyncpg"], version = "^0.8.0"}
+databases = { extras = ["asyncpg"], version = "^0.8.0" }
 pytest-cov = "^4.1.0"
 
 [tool.poetry.dev-dependencies]
@@ -27,3 +27,6 @@ line-length = 90
 [tool.pytest.ini_options]
 testpaths = "tests"
 addopts = "-x --ff"
+
+[tool.coverage.xml]
+output = "pytest-coverage.xml"
