@@ -59,15 +59,21 @@ def add_init_commands(bot: discord.Bot):
 
     @init_commands.command()
     async def next(ctx):
-        pass
+        tracker = await initiative.next_participant(ctx.channel.id)
+        await ctx.respond(str(tracker))
 
     @init_commands.command()
     async def back(ctx):
-        pass
+        tracker = await initiative.previous_participant(ctx.channel.id)
+        await ctx.respond(str(tracker))
 
     @init_commands.command()
-    async def goto(ctx, current_init: int):
-        # TODO support setting by init or player?
-        pass
+    async def goto(ctx, target_name: str) -> None:
+        try:
+            tracker = await initiative.goto_participant(ctx.channel.id, target_name)
+        except NotFoundError:
+            await ctx.respond(f"{target_name} does not exist in this initiative!")
+        else:
+            await ctx.respond(str(tracker))
 
     log.info("Initiative commands added!")
