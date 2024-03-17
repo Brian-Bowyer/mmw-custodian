@@ -27,6 +27,15 @@ def add_init_commands(bot: discord.Bot):
         await ctx.respond("Initiative tracker ended!")
 
     @init_commands.command()
+    async def show(ctx):
+        try:
+            tracker = await initiative.get_initiative(ctx.channel.id)
+        except NotFoundError:
+            await ctx.respond("No initiative tracker found!")
+        else:
+            await ctx.respond(str(tracker))
+
+    @init_commands.command()
     async def add(ctx, player: str, init_value: int, tiebreaker: int = 0):
         try:
             tracker = await initiative.add_participant(ctx.channel.id, player, init_value)
