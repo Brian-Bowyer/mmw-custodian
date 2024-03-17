@@ -292,6 +292,11 @@ async def test_previous_participant_goes_to_the_last_participant_when_at_the_beg
         tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
         tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
 
+        tracker = await initiative.next_participant(channel_id, database=db)
+        tracker = await initiative.next_participant(channel_id, database=db)
+        tracker = await initiative.next_participant(channel_id, database=db)
+        assert tracker.current_participant == initiative.Participant("Alice", 15)
+
         tracker = await initiative.previous_participant(channel_id, database=db)
         tracker = await initiative.previous_participant(channel_id, database=db)
         tracker = await initiative.previous_participant(channel_id, database=db)
