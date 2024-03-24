@@ -3,7 +3,7 @@ from databases import Database
 
 from app.constants import DATABASE_URL
 from app.controllers import initiative
-from app.errors import AlreadyExistsError, NotFoundError
+from app.errors import AlreadyExistsError, BacktrackError, NotFoundError
 
 
 # NOTE: doing the inefficient thing and creating a new Database object for each test
@@ -292,6 +292,11 @@ async def test_previous_participant_goes_to_the_last_participant_when_at_the_beg
         tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
         tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
 
+        tracker = await initiative.next_participant(channel_id, database=db)
+        tracker = await initiative.next_participant(channel_id, database=db)
+        tracker = await initiative.next_participant(channel_id, database=db)
+        assert tracker.current_participant == initiative.Participant("Alice", 15)
+
         tracker = await initiative.previous_participant(channel_id, database=db)
         tracker = await initiative.previous_participant(channel_id, database=db)
         tracker = await initiative.previous_participant(channel_id, database=db)
@@ -308,3 +313,52 @@ async def test_goto_participant_goes_to_the_specified_participant(channel_id):
 
         tracker = await initiative.goto_participant(channel_id, "Charlie", database=db)
         assert tracker.current_participant == initiative.Participant("Charlie", 5)
+
+
+@pytest.mark.asyncio
+async def test_goto_participant_errors_if_not_present(channel_id):
+    async with Database(DATABASE_URL, force_rollback=True) as db:
+        await initiative.create_initiative(channel_id, database=db)
+        with pytest.raises(NotFoundError):
+            await initiative.goto_participant(channel_id, "Charlie", database=db)
+
+
+@pytest.mark.asyncio
+async def test_next_participant_and_previous_participant_wrap_around(channel_id):
+    async with Database(DATABASE_URL, force_rollback=True) as db:
+        await initiative.create_initiative(channel_id, database=db)
+        tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
+        tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
+        tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+
+        tracker = await initiative.next_participant(channel_id, database=db)
+        assert tracker.current_round == 1
+        tracker = await initiative.next_participant(channel_id, database=db)
+        assert tracker.current_round == 1
+
+        tracker = await initiative.next_participant(channel_id, database=db)
+        assert tracker.current_round == 2
+        tracker = await initiative.next_participant(channel_id, database=db)
+        assert tracker.current_round == 2
+        tracker = await initiative.next_participant(channel_id, database=db)
+        assert tracker.current_round == 2
+
+        tracker = await initiative.next_participant(channel_id, database=db)
+        assert tracker.current_round == 3
+
+        tracker = await initiative.previous_participant(channel_id, database=db)
+        assert tracker.current_round == 2
+        tracker = await initiative.previous_participant(channel_id, database=db)
+        assert tracker.current_round == 2
+        tracker = await initiative.previous_participant(channel_id, database=db)
+        assert tracker.current_round == 2
+
+        tracker = await initiative.previous_participant(channel_id, database=db)
+        assert tracker.current_round == 1
+        tracker = await initiative.previous_participant(channel_id, database=db)
+        assert tracker.current_round == 1
+        tracker = await initiative.previous_participant(channel_id, database=db)
+        assert tracker.current_round == 1
+
+        with pytest.raises(BacktrackError):
+            tracker = await initiative.previous_participant(channel_id, database=db)
