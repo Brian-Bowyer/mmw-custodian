@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from asyncpg.exceptions import UniqueViolationError
 from databases import Database
 
-from app.errors import AlreadyExistsError, NotFoundError
+from app.errors import AlreadyExistsError, BacktrackError, NotFoundError
 from app.models import database
 
 # TODO transactions
@@ -53,11 +53,14 @@ class InitiativeTracker:
     def __str__(self):
         """Returns a string representation of the initiative tracker."""
         if self.participants:
-            participant_list = "\n".join(str(p) for p in self.participants)
+            participant_list = "\n".join(
+                f"{p} {' <==' if p == self.current_participant else ''}"
+                for p in self.participants
+            )
         else:
             participant_list = "Nobody!\n"
 
-        return f"Round {self.current_round}\n" + f"Participants:\n" + participant_list
+        return f"Round {self.current_round}\n Participants:\n {participant_list}"
 
     def as_dict(self):
         return {p.name: p.initiative for p in self.participants}
@@ -227,11 +230,18 @@ async def next_participant(
 ) -> InitiativeTracker:
     """Moves to the next participant in an initiative tracker."""
     tracker = await get_initiative(channel_id, database=database)
+    next_index = (tracker.current_index + 1) % len(tracker.participants)
 
     await database.execute(
-        "UPDATE initiative_trackers SET current_index = :current_index WHERE id = :id",
+        "UPDATE initiative_trackers SET current_index = :current_index, current_round = :current_round WHERE id = :id",
         {
-            "current_index": (tracker.current_index + 1) % len(tracker.participants),
+            "current_index": next_index,
+            "current_round": (
+                # if we've wrapped around, increment the round
+                tracker.current_round + 1
+                if tracker.current_index > next_index
+                else tracker.current_round
+            ),
             "id": tracker.id,
         },
     )
@@ -245,11 +255,25 @@ async def previous_participant(
 ) -> InitiativeTracker:
     """Moves to the previous participant in an initiative tracker."""
     tracker = await get_initiative(channel_id, database=database)
+    previous_index = (tracker.current_index - 1) % len(tracker.participants)
+    previous_round = (
+        tracker.current_round - 1
+        if tracker.current_index < previous_index
+        else tracker.current_round
+    )
+    if previous_round < 1:
+        raise BacktrackError("Cannot go back before round 1")
 
     await database.execute(
-        "UPDATE initiative_trackers SET current_index = :current_index WHERE id = :id",
+        "UPDATE initiative_trackers SET current_index = :current_index, current_round = :current_round WHERE id = :id",
         {
-            "current_index": (tracker.current_index - 1) % len(tracker.participants),
+            "current_index": previous_index,
+            "current_round": (
+                # if we've wrapped backwards, decrement the round
+                tracker.current_round - 1
+                if tracker.current_index < previous_index
+                else tracker.current_round
+            ),
             "id": tracker.id,
         },
     )
