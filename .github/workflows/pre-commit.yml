@@ -20,3 +20,4 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Applying ruff format
+          skip_checkout: true
