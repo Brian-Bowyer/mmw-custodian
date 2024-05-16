@@ -351,7 +351,9 @@ async def test_next_participant_and_previous_participant_wrap_around(channel_id)
         await initiative.create_initiative(channel_id, database=db)
         tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
         tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
-        tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+        tracker = await initiative.add_participant(
+            channel_id, "Charlie", 5, database=db
+        )
 
         tracker = await initiative.next_participant(channel_id, database=db)
         assert tracker.current_round == 1
