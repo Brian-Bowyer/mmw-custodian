@@ -29,7 +29,9 @@ def add_init_commands(bot: discord.Bot):
     @init_commands.command()
     async def add(ctx, player: str, init_value: int, tiebreaker: int = 0):
         try:
-            tracker = await initiative.add_participant(ctx.channel.id, player, init_value)
+            tracker = await initiative.add_participant(
+                ctx.channel.id, player, init_value
+            )
         except AlreadyExistsError:
             await ctx.respond(
                 f"{player} is alrerady in this initiative! (use `update` to change their init value))"

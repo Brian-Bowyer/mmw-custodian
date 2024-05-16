@@ -123,7 +123,9 @@ async def test_participant_order_is_correct(channel_id):
         await initiative.create_initiative(channel_id, database=db)
         tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
         tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
-        tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+        tracker = await initiative.add_participant(
+            channel_id, "Charlie", 5, database=db
+        )
         tracker = await initiative.add_participant(
             channel_id, "Deborah", 15, tiebreaker=99, database=db
         )
@@ -131,7 +133,9 @@ async def test_participant_order_is_correct(channel_id):
             channel_id, "Eve", 15, tiebreaker=-10, database=db
         )
         tracker = await initiative.add_participant(channel_id, "Frank", 15, database=db)
-        tracker = await initiative.add_participant(channel_id, "Aabria", 15, database=db)
+        tracker = await initiative.add_participant(
+            channel_id, "Aabria", 15, database=db
+        )
 
         # RULES
         # 1. Sort by initiative value, descending
@@ -197,7 +201,9 @@ async def test_update_participant_updates_an_initiative(channel_id):
         tracker = await initiative.update_participant(
             channel_id, "Bob", 15, tiebreaker=2, database=db
         )
-        assert tracker.participants == (initiative.Participant("Bob", 15, tiebreaker=2),)
+        assert tracker.participants == (
+            initiative.Participant("Bob", 15, tiebreaker=2),
+        )
         db_entry = await db.fetch_all(
             "SELECT * FROM initiative_members WHERE initiative_id = :initiative_id",
             {"initiative_id": tracker.id},
@@ -229,10 +235,14 @@ async def test_current_participant_does_not_change_when_participants_are_added(
         tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
         assert tracker.current_participant == initiative.Participant("Bob", 10)
 
-        tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+        tracker = await initiative.add_participant(
+            channel_id, "Charlie", 5, database=db
+        )
         assert tracker.current_participant == initiative.Participant("Bob", 10)
 
-        tracker = await initiative.add_participant(channel_id, "Deborah", 10, database=db)
+        tracker = await initiative.add_participant(
+            channel_id, "Deborah", 10, database=db
+        )
         assert tracker.current_participant == initiative.Participant("Bob", 10)
 
 
@@ -242,7 +252,9 @@ async def test_next_participant_goes_to_the_next_participant(channel_id):
         await initiative.create_initiative(channel_id, database=db)
         tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
         tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
-        tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+        tracker = await initiative.add_participant(
+            channel_id, "Charlie", 5, database=db
+        )
 
         assert tracker.current_participant == initiative.Participant("Alice", 15)
         tracker = await initiative.next_participant(channel_id, database=db)
@@ -252,12 +264,16 @@ async def test_next_participant_goes_to_the_next_participant(channel_id):
 
 
 @pytest.mark.asyncio
-async def test_next_participant_goes_to_the_first_participant_when_at_the_end(channel_id):
+async def test_next_participant_goes_to_the_first_participant_when_at_the_end(
+    channel_id,
+):
     async with Database(DATABASE_URL, force_rollback=True) as db:
         await initiative.create_initiative(channel_id, database=db)
         tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
         tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
-        tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+        tracker = await initiative.add_participant(
+            channel_id, "Charlie", 5, database=db
+        )
 
         tracker = await initiative.next_participant(channel_id, database=db)
         tracker = await initiative.next_participant(channel_id, database=db)
@@ -271,7 +287,9 @@ async def test_previous_participant_goes_to_the_previous_participant(channel_id)
         await initiative.create_initiative(channel_id, database=db)
         tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
         tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
-        tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+        tracker = await initiative.add_participant(
+            channel_id, "Charlie", 5, database=db
+        )
 
         tracker = await initiative.next_participant(channel_id, database=db)
         tracker = await initiative.next_participant(channel_id, database=db)
@@ -290,7 +308,9 @@ async def test_previous_participant_goes_to_the_last_participant_when_at_the_beg
         await initiative.create_initiative(channel_id, database=db)
         tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
         tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
-        tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+        tracker = await initiative.add_participant(
+            channel_id, "Charlie", 5, database=db
+        )
 
         tracker = await initiative.previous_participant(channel_id, database=db)
         tracker = await initiative.previous_participant(channel_id, database=db)
@@ -304,7 +324,9 @@ async def test_goto_participant_goes_to_the_specified_participant(channel_id):
         await initiative.create_initiative(channel_id, database=db)
         tracker = await initiative.add_participant(channel_id, "Alice", 15, database=db)
         tracker = await initiative.add_participant(channel_id, "Bob", 10, database=db)
-        tracker = await initiative.add_participant(channel_id, "Charlie", 5, database=db)
+        tracker = await initiative.add_participant(
+            channel_id, "Charlie", 5, database=db
+        )
 
         tracker = await initiative.goto_participant(channel_id, "Charlie", database=db)
         assert tracker.current_participant == initiative.Participant("Charlie", 5)
