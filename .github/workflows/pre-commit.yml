@@ -1,4 +1,4 @@
-name: pre-commit
+name: autoformat
 
 on:
   pull_request:
@@ -9,7 +9,9 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       # - uses: actions/setup-python@v3
       # - uses: pre-commit/action@v3.0.1
       - uses: chartboost/ruff-action@v1
