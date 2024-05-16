@@ -18,7 +18,11 @@ jobs:
       # - uses: pre-commit/action@v3.0.1
       - uses: chartboost/ruff-action@v1
         with:
-          args: format
-      - uses: stefanzweifel/git-auto-commit-action@v5
+          args: "check --fix"
+      - uses: chartboost/ruff-action@v1
         with:
-          commit_message: Applying ruff format
+          args: "format"
+      - uses: EndBug/add-and-commit@v9
+        with:
+          message: "Applying ruff format"
+          default_author: github_actions
