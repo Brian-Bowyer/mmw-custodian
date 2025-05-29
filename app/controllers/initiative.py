@@ -1,5 +1,4 @@
 import logging
-from bisect import insort  # adds to a list in sorted order
 from dataclasses import dataclass, field
 
 from asyncpg.exceptions import UniqueViolationError

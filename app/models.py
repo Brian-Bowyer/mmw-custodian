@@ -40,7 +40,9 @@ class InitiativeTracker(Base):
 class InitiativeMember(Base):
     __tablename__ = "initiative_members"
     __table_args__ = (
-        UniqueConstraint("initiative_id", "player_name", name="unique_initiative_member"),
+        UniqueConstraint(
+            "initiative_id", "player_name", name="unique_initiative_member"
+        ),
     )
 
     id = Column(Integer, primary_key=True)
